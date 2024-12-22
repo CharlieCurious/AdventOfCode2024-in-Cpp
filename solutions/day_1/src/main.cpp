@@ -44,7 +44,7 @@ int main() {
     }
 
     std::sort(leftCol.begin(), leftCol.end());
-    std:: sort(rightCol.begin(), rightCol.end());
+    std::sort(rightCol.begin(), rightCol.end());
 
     int32_t part1Sum = 0;
     int32_t part2Sum = 0;
