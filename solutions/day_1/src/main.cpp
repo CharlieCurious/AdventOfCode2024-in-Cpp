@@ -51,8 +51,9 @@ int main() {
     for (uint32_t i = 0; i < lineCount; i++) {
         int32_t leftNum = leftCol[i];
         int32_t rightNum = rightCol[i];
+        int32_t multiplier = multipliers[leftNum];
         part1Sum += abs(leftNum - rightNum);
-        part2Sum += multipliers[leftNum] == 0 ? 0 : leftNum * multipliers[leftNum];
+        part2Sum += (multiplier > 0) ? leftNum * multiplier : 0;
     }
 
     auto endTime = std::chrono::high_resolution_clock::now();
