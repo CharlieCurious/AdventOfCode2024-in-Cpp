@@ -21,3 +21,16 @@ bool isLineSafe(const std::vector<int32_t>& numbers) {
 
     return true;
 }
+
+bool isLineSafeDampened(const std::vector<int32_t>& numbers) {
+    for (size_t i = 0; i < numbers.size(); i++) {
+        std::vector<int32_t> modfiedNumbers = numbers;
+        modfiedNumbers.erase(modfiedNumbers.begin() + i);
+
+        if (isLineSafe(modfiedNumbers)) {
+            return true;
+        }
+    }
+
+    return false;
+}

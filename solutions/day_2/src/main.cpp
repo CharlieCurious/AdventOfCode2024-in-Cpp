@@ -23,6 +23,7 @@ int main() {
     std::string line; 
     uint16_t lineIndex = 0;
     uint16_t part1SafeReportsCount = 0;
+    uint16_t part2SafeReportsCount = 0;
     while (getline(file, line) && lineIndex < INPUT_LINE_COUNT) {
         std::vector<int32_t> lineNumbers;
         lineNumbers.reserve(5);
@@ -35,12 +36,16 @@ int main() {
 
         if (isLineSafe(lineNumbers)) {
             part1SafeReportsCount++;
+            part2SafeReportsCount++;
+        } else if(isLineSafeDampened(lineNumbers)) {
+            part2SafeReportsCount++;     
         }
 
         lineIndex++;
     }
 
     std::cout << "Part 1: " << part1SafeReportsCount << "\n";
+    std::cout << "Part 2: " << part2SafeReportsCount << "\n";
      
     return EXIT_SUCCESS;
 }

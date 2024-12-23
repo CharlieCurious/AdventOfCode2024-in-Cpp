@@ -16,6 +16,7 @@ function(addTests dayName)
         get_filename_component(testName ${testFile} NAME_WE)
 
         add_executable(${testName} ${testFile})
+        target_compile_options(${testName} PRIVATE -Wall -Wextra -g)
         set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIR})
 
         if (day_lib_exists)
