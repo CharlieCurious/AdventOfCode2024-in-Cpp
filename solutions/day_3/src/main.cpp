@@ -42,10 +42,9 @@ int main() {
         uint16_t firstNumber = std::stoi(matchedString.substr(4, comma - 4));
         uint16_t secondNumber = std::stoi(matchedString.substr(comma + 1, matchedString.length() - comma - 2));
 
-        uint32_t result = firstNumber * secondNumber;
-        part1Sum += result;
+        part1Sum += firstNumber * secondNumber;
         if (isDoBlock) {
-            part2Sum += result;
+            part2Sum += firstNumber * secondNumber;
         }
 
         searchStart = match.suffix().first;
