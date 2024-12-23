@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <report.hpp>
 
-bool isLineSafe(std::vector<int32_t> numbers) {
+bool isLineSafe(const std::vector<int32_t>& numbers) {
     bool isIncreasing = numbers[1] > numbers[0];
 
     for (uint8_t i = 1; i < numbers.size(); i++) {

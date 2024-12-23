@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunValgrind.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/AddTests.cmake)
 
 function(addAdventDay dayName)
     set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${dayName}/src")
@@ -9,5 +9,7 @@ function(addAdventDay dayName)
     target_include_directories(${dayName} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${dayName}/include)
     target_compile_options(${dayName} PRIVATE -Wall -Wextra -O2 -g)
 
-    runValgrind(${dayName})
+    if (ENABLE_TESTS)
+        addTests(${dayName})
+    endif()
 endfunction()

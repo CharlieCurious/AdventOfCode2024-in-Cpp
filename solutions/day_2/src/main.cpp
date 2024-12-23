@@ -7,15 +7,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <chrono>
 
 #include<report.hpp>
 
 #define INPUT_LINE_COUNT 1000
 
 int main() {
-
-    auto startTime = std::chrono::high_resolution_clock::now();
 
     const std::string fileName = "input_files/day_2.txt";
     std::ifstream file(fileName);
@@ -43,11 +40,7 @@ int main() {
         lineIndex++;
     }
 
-    auto endTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsedSeconds = endTime - startTime;
-
     std::cout << "Part 1: " << part1SafeReportsCount << "\n";
-    std::cout << "Execution time: " << elapsedSeconds.count() << "seconds\n";
      
     return EXIT_SUCCESS;
 }

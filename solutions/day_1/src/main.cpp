@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <chrono>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -11,8 +10,6 @@
 #define INPUT_LINE_COUNT 1000
 
 int main() {
-
-    auto startTime = std::chrono::high_resolution_clock::now();
 
     const std::string fileName = "input_files/day_1.txt"; 
     std::ifstream file(fileName);
@@ -56,13 +53,8 @@ int main() {
         part2Sum += (multiplier > 0) ? leftNum * multiplier : 0;
     }
 
-    auto endTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsedSeconds = endTime - startTime;
-
     std::cout << "Part 1: " << part1Sum << "\n";
     std::cout << "Part 2: " << part2Sum << "\n";
-
-    std::cout << "Execution time: " << elapsedSeconds.count() << "seconds\n";
 
     return EXIT_SUCCESS;
 }

@@ -3,4 +3,6 @@
 #include <cstdint>
 #include <vector>
 
-bool isLineSafe(std::vector<int32_t> numbers);
+bool isLineSafe(const std::vector<int32_t>& numbers);
+
+bool isLineSafeDampened(const std::vector<int32_t>& numbers);
