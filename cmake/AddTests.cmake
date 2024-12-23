@@ -3,6 +3,12 @@ function(addTests dayName)
 
     file(GLOB TEST_SRCS "${CMAKE_SOURCE_DIR}/solutions/${dayName}/tests/*.cpp")
 
+    # Check if ${dayName}_lib exists
+    set(day_lib_exists OFF)
+    if (TARGET ${dayName}_lib)
+        set(day_lib_exists ON)
+    endif()
+
     set(TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/tests")
 
     foreach(testFile ${TEST_SRCS})
@@ -10,9 +16,13 @@ function(addTests dayName)
         get_filename_component(testName ${testFile} NAME_WE)
 
         add_executable(${testName} ${testFile})
-        target_link_libraries(${testName} PRIVATE ut)
-
         set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIR})
+
+        if (day_lib_exists)
+            target_link_libraries(${testName} PRIVATE ut ${dayName}_lib)
+        else()
+            target_link_libraries(${testName} PRIVATE ut)
+        endif()
 
         add_test(NAME ${testName} COMMAND ${testName})
     endforeach()
