@@ -6,8 +6,7 @@
 #include <sstream>
 
 int main() {
-    const std::string fileName = "input_files/day_3.txt";
-    const std::ifstream file(fileName);
+    std::ifstream file("input_files/day_3.txt");
     if (!file.is_open()) {
         std::cerr << "Could not open input file." << std::endl; 
         return EXIT_FAILURE;
@@ -15,6 +14,8 @@ int main() {
 
     std::stringstream buffer;
     buffer << file.rdbuf();
+    file.close();
+
     std::string content = buffer.str();
 
     std::regex patterns(R"(mul\(\d+,\d+\)|don't\(\)|do\(\))");
