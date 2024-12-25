@@ -16,7 +16,10 @@ function(addTests dayName)
         get_filename_component(testName ${testFile} NAME_WE)
 
         add_executable(${testName} ${testFile})
+        
         target_compile_options(${testName} PRIVATE -Wall -Wextra -g)
+        target_compile_definitions(${testName} PRIVATE TESTING) #Used for using test-specific defines.
+        target_include_directories(${testName} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${dayName}/include)
         set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIR})
 
         if (day_lib_exists)
