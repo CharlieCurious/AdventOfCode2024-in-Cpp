@@ -25,16 +25,22 @@ int main() {
     }
 
     uint32_t xmasFound = 0;
+    uint32_t X_MASFound = 0;
     for (uint8_t x = 0; x < GRID_SIDE_SZ; x++) {
         for (uint8_t y = 0; y < GRID_SIDE_SZ; y++) {
             char c = grid[x][y];
             if (c == 'X') {
                 xmasFound += findXmas(grid, GRID_SIDE_SZ, x, y);
             }
+
+            if (x > 0 && x < GRID_SIDE_SZ - 1 && y > 0 && y < GRID_SIDE_SZ - 1 && c == 'A' && matchesPatternX_MAS(grid, x, y)) {
+                X_MASFound++;
+            }
         }
     }
 
     std::cout << "Part 1: " << xmasFound << "\n";
+    std::cout << "Part 2: " << X_MASFound << "\n";
 
     return EXIT_SUCCESS;
 }
