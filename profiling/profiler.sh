@@ -5,7 +5,7 @@ BOLD="\033[1m"
 RESET="\033[0m"
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <path_to_executable> [--tool memcheck|cache]"
+    echo "Usage: $0 <path_to_executable> [memcheck|cache|perf]"
     exit 1
 fi
 
@@ -29,18 +29,7 @@ run_cachegrind() {
 
 check_execution_time() {
     echo -e "${CYAN}${BOLD}=== Measuring execution time of '${EXECUTABLE}' ===${RESET}"
-    start_time=$(date +%s%N)
-
-    "$EXECUTABLE"
-
-    # Get the end time in nanoseconds
-    end_time=$(date +%s%N)
-
-    execution_time=$((end_time - start_time))
-    seconds=$((execution_time / 1000000000))
-    nanoseconds=$((execution_time % 1000000000))
-
-    echo -e "Execution time: ${seconds}.${nanoseconds} seconds"
+    perf stat -e task-clock,cycles,instructions,cache-references,cache-misses "$EXECUTABLE"
 }
 
 case $TOOL in
@@ -50,7 +39,7 @@ case $TOOL in
     cache)
         run_cachegrind
         ;;
-    time)
+    perf)
         check_execution_time
         ;;
     all)
@@ -60,7 +49,7 @@ case $TOOL in
         ;;
     *)
         echo "Invalid tool: $TOOL"
-        echo "Valid options are: --tool memcheck, --tool cache, --tool time, or leave empty for all."
+        echo "Valid options are: memcheck, cache, perf, or leave empty for all."
         exit 1
         ;;
 esac
