@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cstdio>
 #include <cstdlib>
@@ -7,8 +8,10 @@
 #include <string>
 #include <vector>
 
-#include <update.hpp>
+static constexpr uint8_t NUM_PAGES = 100;
+static constexpr uint8_t NUM_UPDATE_LINES = 208;
 
+static bool isUpdateOrdered(const std::vector<uint8_t> &pages, const std::array<std::array<bool, NUM_PAGES>, NUM_PAGES> &rules);
 static std::vector<uint8_t> parseRule(char *buffer);
 static void processUpdate(
         std::vector<uint8_t> &pages, 
@@ -78,6 +81,15 @@ static std::vector<uint8_t> parseRule(char *buffer) {
     return pages;
 }
 
+bool isUpdateOrdered(const std::vector<uint8_t> &pages, const std::array<std::array<bool, NUM_PAGES>, NUM_PAGES> &rules) {
+    for (uint8_t i = 0; i < pages.size()-1; i++) {
+        if (rules[pages[i+1]][pages[i]]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static void processUpdate(
         std::vector<uint8_t> &pages, 
         std::array<std::array<bool, NUM_PAGES>, NUM_PAGES> &rules,
@@ -85,9 +97,9 @@ static void processUpdate(
         uint32_t &part2) {
 
     if (isUpdateOrdered(pages, rules)) {
-        part1 += getMiddlePage(pages);
+        part1 += pages[pages.size() / 2];
     } else {
-        reorderPages(pages, rules);
-        part2 += getMiddlePage(pages);
+        std::sort(pages.begin(), pages.end(), [&rules](uint8_t a, uint8_t b) { return rules[a][b]; });
+        part2 += pages[pages.size() / 2];
     }
 }
