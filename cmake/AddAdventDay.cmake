@@ -18,7 +18,7 @@ function(addAdventDay dayName)
     endforeach()
 
     set(SANITIZERS -fsanitize=address -fsanitize=undefined -no-pie) # Optionally add this. 
-    set(COMPILER_FLAGS -Wall -Wextra)
+    set(COMPILER_FLAGS -Wall -Wextra -g)
 
     # If there are lib files, create a static library with all source files except main.cpp
     if (LIB_FILES)
