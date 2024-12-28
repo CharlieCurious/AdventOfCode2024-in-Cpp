@@ -28,7 +28,7 @@ struct Position {
     Position(int16_t x, int16_t y, Direction direction) : 
         x{x}, y{y}, direction{direction} {}
 
-    bool operator==(Position &other) {
+    bool operator==(const Position &other) const {
         return this->x == other.x && 
             this->y == other.y &&
             this->direction == other.direction;
@@ -56,11 +56,10 @@ struct Position {
 static void walk(
         std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, 
         uint16_t &visitedCount,
-        bool &isCycle,
-        Position &currentPosition,
-        Position *previousPosition);
+        const Position &currentPosition);
 
-static bool isObstruction(std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, Position &position);
+static bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position);
+static Position getNextPosition(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &currentPosition);
 
 int main() {
 
@@ -94,8 +93,7 @@ int main() {
     fclose(file);
 
     uint16_t visitedCount = 0;
-    bool isCycle = false;
-    walk(grid, visitedCount, isCycle, guardPos, nullptr);
+    walk(grid, visitedCount, guardPos);
     
 
     std::cout << "Part 1: " << visitedCount << '\n';
@@ -103,47 +101,61 @@ int main() {
     return EXIT_SUCCESS;
 }
 
-static bool isObstruction(std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, Position &position) {
+static bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position) {
     return grid[position.x][position.y] == OBSTACLE;
+}
+
+static Position getNextPosition(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &currentPosition) {
+    Position next;
+    switch (currentPosition.direction) {
+        case NORTH:
+            next = currentPosition.nextPosition(NORTH);
+            if (isObstruction(grid, next)) {
+                next = currentPosition.nextPosition(EAST);
+                if (isObstruction(grid, next)) {
+                    next = currentPosition.nextPosition(SOUTH);
+                }
+            }
+            break;
+        case EAST:
+            next = currentPosition.nextPosition(EAST);
+            if (isObstruction(grid, next)) {
+                next = currentPosition.nextPosition(SOUTH);
+                if (isObstruction(grid, next)) {
+                    next = currentPosition.nextPosition(WEST);
+                }
+            }
+            break;
+        case WEST:
+            next = currentPosition.nextPosition(WEST);
+            if (isObstruction(grid, next)) {
+                next = currentPosition.nextPosition(NORTH);
+                if (isObstruction(grid, next)) {
+                    next = currentPosition.nextPosition(EAST);
+                }
+            }
+            break;
+        case SOUTH:
+            next = currentPosition.nextPosition(SOUTH);
+            if (isObstruction(grid, next)) {
+                next = currentPosition.nextPosition(WEST);
+                if (isObstruction(grid, next)) {
+                    next = currentPosition.nextPosition(NORTH);
+                }
+            }
+            break;
+    }
+
+    return next;
 }
 
 void walk(
         std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, 
         uint16_t &visitedCount,
-        bool &isCycle,
-        Position &currentPosition,
-        Position *previousPosition) {
-    
+        const Position &currentPosition) {
 
     if (currentPosition.isOutOfGrid()) {
         return;
-    }
-
-    if (previousPosition != nullptr && currentPosition == *previousPosition) {
-        isCycle = true;
-        return;
-    }
-
-    // Corner edge case
-    if (grid[currentPosition.x][currentPosition.y] == OBSTACLE) {
-        Direction newDirection;
-        switch(currentPosition.direction) {
-            case NORTH:
-                newDirection = SOUTH;
-                break;
-            case EAST:
-                newDirection = WEST;
-                break;
-            case SOUTH:
-                newDirection = NORTH;
-                break;
-            case WEST:
-                newDirection = EAST;
-                break;
-        }
-        currentPosition.x = previousPosition->x;
-        currentPosition.y = previousPosition->y;
-        currentPosition.direction = newDirection;
     }
 
     if(grid[currentPosition.x][currentPosition.y] != VISITED) {
@@ -151,41 +163,7 @@ void walk(
         visitedCount++;
     }
 
-    Position next;
-    switch (currentPosition.direction) {
-        case NORTH:
-            next = currentPosition.nextPosition(NORTH);
-            if (isObstruction(grid, next)) {
-                next.x = currentPosition.x;
-                next.y = currentPosition.y + 1;
-                next.direction = EAST;
-            }
-            break;
-        case EAST:
-            next = currentPosition.nextPosition(EAST);
-            if (isObstruction(grid, next)) {
-                next.x = currentPosition.x+1;
-                next.y = currentPosition.y;
-                next.direction = SOUTH;
-            }
-            break;
-        case WEST:
-            next = currentPosition.nextPosition(WEST);
-            if (isObstruction(grid, next)) {
-                next.x = currentPosition.x-1;
-                next.y = currentPosition.y;
-                next.direction = NORTH;
-            }
-            break;
-        case SOUTH:
-            next = currentPosition.nextPosition(SOUTH);
-            if (isObstruction(grid, next)) {
-                next.x = currentPosition.x;
-                next.y = currentPosition.y - 1;
-                next.direction = WEST;
-            }
-            break;
-    }
+    const Position next = getNextPosition(grid, currentPosition);
 
-    return walk(grid, visitedCount, isCycle, next, &currentPosition);
+    return walk(grid, visitedCount, next);
 }
