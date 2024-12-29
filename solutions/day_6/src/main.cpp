@@ -90,7 +90,7 @@ template<typename Hash, typename Equality>
 static void walk(
         std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, 
         std::unordered_set<Position, Hash, Equality> &visited,
-        const Position &currentPosition,
+        Position &currentPosition,
         uint16_t *cyclesDetected);
 
 static bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position);
@@ -127,11 +127,13 @@ int main() {
 
     fclose(file);
 
-    std::unordered_set<Position, PositionHash, PositionEqualIgnoreDirection> visited{};
+    std::unordered_set<Position, PositionHash, PositionEqualIgnoreDirection> visited;
     visited.reserve(5000);
     walk(grid, visited, guardPos, nullptr);
     
     uint16_t cyclesDetected = 0;
+    std::unordered_set<Position, PositionHashWithDirection> visitedWithDirection;
+    visited.reserve(5000);
     for (const auto &position : visited) {
         char tmp = grid[position.x][position.y];
         if (tmp == GUARD)
@@ -139,11 +141,11 @@ int main() {
 
         grid[position.x][position.y] = OBSTACLE; 
 
-        std::unordered_set<Position, PositionHashWithDirection> visited{};
-
-        walk(grid, visited, guardPos, &cyclesDetected);
+        walk(grid, visitedWithDirection, guardPos, &cyclesDetected);
 
         grid[position.x][position.y] = tmp; 
+
+        visitedWithDirection.clear();
     }
 
     std::cout << "Part 1: " << visited.size() << '\n';
@@ -200,7 +202,6 @@ static Position getNextPosition(const std::array<std::array<char, GRID_SIDE_SIZE
             }
             break;
     }
-
     return next;
 }
 
@@ -208,21 +209,22 @@ template<typename Hash, typename Equality>
 void walk(
         std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, 
         std::unordered_set<Position, Hash, Equality> &visited,
-        const Position &currentPosition,
+        Position &startPosition,
         uint16_t *cyclesDetected) {
 
-    if (currentPosition.isOutOfGrid()) {
-        return;
+    Position current = startPosition;
+    while (true) {
+        if (current.isOutOfGrid()) {
+            return;
+        }
+
+        if (cyclesDetected != nullptr && visited.contains(current)) {
+            (*cyclesDetected)++;
+            return;
+        }
+
+        visited.insert(current);
+
+        current = getNextPosition(grid, current);
     }
-
-    if (cyclesDetected != nullptr && visited.contains(currentPosition)) {
-        std::cout << "Cycle detected at: (" << currentPosition.x << ", " << currentPosition.y
-              << ") with direction " << currentPosition.direction << '\n';
-        (*cyclesDetected)++;
-        return;
-    }
-
-    visited.insert(currentPosition);
-
-    return walk(grid, visited, getNextPosition(grid, currentPosition), cyclesDetected);
 }
