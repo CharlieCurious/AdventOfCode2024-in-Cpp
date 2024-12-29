@@ -28,11 +28,17 @@ struct Position {
     Position(int16_t x, int16_t y, Direction direction) : 
         x{x}, y{y}, direction{direction} {}
 
+    Position(const Position&) = default;
+    Position& operator=(const Position&) = default;
+
     bool operator==(const Position &other) const {
         return this->x == other.x && 
             this->y == other.y &&
             this->direction == other.direction;
     }
+
+    Position(Position&&) noexcept = default;
+    Position& operator=(Position&&) noexcept = default;
 
     Position nextPosition(Direction direction) const {
         switch(direction) {
@@ -93,7 +99,7 @@ static void walk(
         Position &currentPosition,
         uint16_t *cyclesDetected);
 
-static bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position);
+static inline bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position);
 static Position getNextPosition(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &currentPosition);
 
 int main() {
@@ -154,7 +160,7 @@ int main() {
     return EXIT_SUCCESS;
 }
 
-static bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position) {
+static inline bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position) {
     if (position.x < 0 || position.x >= GRID_SIDE_SIZE ||
             position.y < 0 || position.y >= GRID_SIDE_SIZE)
         return false;
