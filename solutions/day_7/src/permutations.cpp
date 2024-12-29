@@ -27,7 +27,7 @@ std::vector<std::string> getPermutationsForR(std::unordered_map<uint8_t, std::ve
     }
 
     std::vector<std::string> permutations;
-    permutations.reserve(std::pow(2, r));
+    permutations.reserve(part2 ? std::pow(3, r) : std::pow(2, r));
 
     std::string slots(r, ' ');
 

@@ -1,4 +1,3 @@
-#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
@@ -10,9 +9,16 @@
 #include <vector>
 
 static uint64_t concatenate(uint64_t a, uint16_t b) {
-    uint8_t bDigits = (b == 0) ? 1 : log10(b) + 1;
+    static const uint16_t factors[] = {1, 10, 100, 1000, 10000};
 
-    return a * pow(10, bDigits) + b;
+    // Find the number of digits in b using branchless math
+    uint8_t bDigits = 
+        (b >= 10000) ? 5 :
+        (b >= 1000) ? 4 :
+        (b >= 100) ? 3 :
+        (b >= 10) ? 2 : 1;
+
+    return a * factors[bDigits] + b;
 }
 
 static bool isValidEquation(
@@ -54,8 +60,11 @@ int main() {
         return EXIT_FAILURE; 
     }
     
-    std::unordered_map<uint8_t, std::vector<std::string>> permutationsCache;
-    permutationsCache.reserve(10);
+    std::unordered_map<uint8_t, std::vector<std::string>> permutationsCachePart1;
+    permutationsCachePart1.reserve(12);
+
+    std::unordered_map<uint8_t, std::vector<std::string>> permutationsCachePart2;
+    permutationsCachePart2.reserve(12);
 
     uint64_t part1Sum = 0;
     uint64_t part2Sum = 0;
@@ -68,20 +77,18 @@ int main() {
 
         std::istringstream iss(buffer.substr(delimiter + 1));
         std::vector<uint16_t> numbers;
-        numbers.reserve(10);
+        numbers.reserve(12);
 
         uint16_t number;
         while (iss >> number) {
             numbers.push_back(number);
         }
 
-        if (isValidEquation(result, numbers, permutationsCache, false)) {
+        if (isValidEquation(result, numbers, permutationsCachePart1, false)) {
             part1Sum += result;
         }
 
-        permutationsCache.clear();
-
-        if (isValidEquation(result, numbers, permutationsCache, true)) {
+        if (isValidEquation(result, numbers, permutationsCachePart2, true)) {
             part2Sum += result;
         }
         
