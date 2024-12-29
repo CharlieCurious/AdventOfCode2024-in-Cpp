@@ -1,11 +1,12 @@
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <unordered_set>
+#include <vector>
 
 constexpr int16_t GRID_SIDE_SIZE = 130; 
 constexpr char OBSTACLE = '#';
@@ -31,14 +32,14 @@ struct Position {
     Position(const Position&) = default;
     Position& operator=(const Position&) = default;
 
+    Position(Position&&) noexcept = default;
+    Position& operator=(Position&&) noexcept = default;
+
     bool operator==(const Position &other) const {
         return this->x == other.x && 
             this->y == other.y &&
             this->direction == other.direction;
     }
-
-    Position(Position&&) noexcept = default;
-    Position& operator=(Position&&) noexcept = default;
 
     Position nextPosition(Direction direction) const {
         switch(direction) {
@@ -59,48 +60,39 @@ struct Position {
     }
 };
 
-struct PositionHash {
-    std::size_t operator()(const Position &position) const {
-        std::size_t seed = 0;
-        std::hash<int16_t> hash{};
-        seed ^= hash(position.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= hash(position.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-
-struct PositionHashWithDirection {
-    std::size_t operator()(const Position &position) const {
-        std::size_t seed = 0;
-        std::hash<int16_t> hash{};
-        seed ^= hash(position.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= hash(position.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= hash(static_cast<int16_t>(position.direction)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-
-struct PositionEqual {
-    bool operator()(const Position &a, const Position &b) const {
-        return a.x == b.x && a.y == b.y && a.direction == b.direction; // Ignore direction
-    }
-};
-
-struct PositionEqualIgnoreDirection {
-    bool operator()(const Position &a, const Position &b) const {
-        return a.x == b.x && a.y == b.y; // Ignore direction
-    }
-};
-
-template<typename Hash, typename Equality>
 static void walk(
         std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, 
-        std::unordered_set<Position, Hash, Equality> &visited,
+        std::vector<std::array<std::bitset<GRID_SIDE_SIZE>, 4>> &visitedCache,
         Position &currentPosition,
         uint16_t *cyclesDetected);
 
 static inline bool isObstruction(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &position);
 static Position getNextPosition(const std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, const Position &currentPosition);
+
+static inline bool isVisitedSameDirection(const std::vector<std::array<std::bitset<GRID_SIDE_SIZE>, 4>> &visitedCache, int16_t x, int16_t y, Direction direction) {
+    return visitedCache[x][direction].test(y);
+}
+
+static uint16_t getTotalVisitedCount(const std::vector<std::array<std::bitset<GRID_SIDE_SIZE>, 4>> &visitedCache) {
+    uint16_t visitedCount = 0;
+
+    for (int16_t x = 0; x < GRID_SIDE_SIZE; x++) {
+        for (int16_t y = 0; y < GRID_SIDE_SIZE; y++) {
+            bool isVisitedInAnyDirection = false;
+            for (int dir = 0; dir < 4; dir++) {
+                if (visitedCache[x][dir].test(y)) {
+                    isVisitedInAnyDirection = true;
+                    break;
+                }
+            }
+            if (isVisitedInAnyDirection) {
+                visitedCount++;
+            }
+        }
+    }
+
+    return visitedCount;
+}
 
 int main() {
 
@@ -133,28 +125,41 @@ int main() {
 
     fclose(file);
 
-    std::unordered_set<Position, PositionHash, PositionEqualIgnoreDirection> visited;
-    visited.reserve(5000);
-    walk(grid, visited, guardPos, nullptr);
+    std::vector<std::array<std::bitset<GRID_SIDE_SIZE>, 4>> visitedCache(GRID_SIDE_SIZE);
+    walk(grid, visitedCache, guardPos, nullptr);
+
+    uint16_t totalVisitedCount = getTotalVisitedCount(visitedCache);
     
     uint16_t cyclesDetected = 0;
-    std::unordered_set<Position, PositionHashWithDirection> visitedWithDirection;
-    visited.reserve(5000);
-    for (const auto &position : visited) {
-        char tmp = grid[position.x][position.y];
-        if (tmp == GUARD)
-            continue;
+    std::vector<std::array<std::bitset<GRID_SIDE_SIZE>, 4>> visitedCachePart2(GRID_SIDE_SIZE);
+    for (int16_t x = 0; x < GRID_SIDE_SIZE; ++x) {
+        for (int16_t y = 0; y < GRID_SIDE_SIZE; ++y) {
 
-        grid[position.x][position.y] = OBSTACLE; 
+            bool visitedInAnyDirection = false;
 
-        walk(grid, visitedWithDirection, guardPos, &cyclesDetected);
+            for (int dir = 0; dir < 4; ++dir) {  // Check for all 4 directions
+                if (visitedCache[x][dir].test(y)) {
+                    visitedInAnyDirection = true;
+                    break;                
+                }
+            }
 
-        grid[position.x][position.y] = tmp; 
+            if (visitedInAnyDirection) {
+                char tmp = grid[x][y];
+                if (tmp == GUARD) {
+                    continue;                }
 
-        visitedWithDirection.clear();
+                grid[x][y] = OBSTACLE;
+
+                walk(grid, visitedCachePart2, guardPos, &cyclesDetected);
+                grid[x][y] = tmp;
+
+                std::fill(visitedCachePart2.begin(), visitedCachePart2.end(), std::array<std::bitset<GRID_SIDE_SIZE>, 4>{});
+            }
+        }
     }
 
-    std::cout << "Part 1: " << visited.size() << '\n';
+    std::cout << "Part 1: " << totalVisitedCount << '\n';
     std::cout << "Part 2: " << cyclesDetected << '\n';
 
     return EXIT_SUCCESS;
@@ -211,10 +216,9 @@ static Position getNextPosition(const std::array<std::array<char, GRID_SIDE_SIZE
     return next;
 }
 
-template<typename Hash, typename Equality>
 void walk(
         std::array<std::array<char, GRID_SIDE_SIZE>, GRID_SIDE_SIZE> &grid, 
-        std::unordered_set<Position, Hash, Equality> &visited,
+        std::vector<std::array<std::bitset<GRID_SIDE_SIZE>, 4>> &visitedCache,
         Position &startPosition,
         uint16_t *cyclesDetected) {
 
@@ -224,12 +228,12 @@ void walk(
             return;
         }
 
-        if (cyclesDetected != nullptr && visited.contains(current)) {
+        if (cyclesDetected != nullptr && isVisitedSameDirection(visitedCache, current.x, current.y, current.direction)) {
             (*cyclesDetected)++;
             return;
         }
 
-        visited.insert(current);
+        visitedCache[current.x][current.direction].set(current.y);
 
         current = getNextPosition(grid, current);
     }
