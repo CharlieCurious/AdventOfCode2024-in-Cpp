@@ -21,8 +21,8 @@ void permutationsHelper(std::vector<std::string> &permutations, std::string &slo
 }
 
 // r == length of permutation
-std::vector<std::string> getPermutationsForR(std::unordered_map<uint8_t, std::vector<std::string>> &permutationsCache, uint8_t r, bool part2) {
-    if (permutationsCache.contains(r)) {
+std::vector<std::string> getPermutationsForR(std::array<std::vector<std::string>, MAX_PERMUTATION_R> &permutationsCache, uint8_t r, bool part2) {
+    if (!permutationsCache[r].empty()) {
         return permutationsCache[r];
     }
 

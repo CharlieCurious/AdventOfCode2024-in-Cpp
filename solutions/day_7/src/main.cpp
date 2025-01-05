@@ -1,12 +1,15 @@
+#include <array>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <permutations.hpp>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 #include <vector>
+
+constexpr uint16_t NUM_EQUATIONS = 850;
 
 static uint64_t concatenate(uint64_t a, uint16_t b) {
     static const uint16_t factors[] = {1, 10, 100, 1000, 10000};
@@ -24,7 +27,7 @@ static uint64_t concatenate(uint64_t a, uint16_t b) {
 static bool isValidEquation(
         uint64_t result, 
         const std::vector<uint16_t> &numbers, 
-        std::unordered_map<uint8_t, std::vector<std::string>> &permutationsCache,
+        std::array<std::vector<std::string>, MAX_PERMUTATION_R> &permutationsCache,
         bool part2) {
 
     std::vector<std::string> permutations = getPermutationsForR(permutationsCache, numbers.size(), part2);
@@ -59,40 +62,49 @@ int main() {
         std::cerr << "Failed to open input file." << std::endl;
         return EXIT_FAILURE; 
     }
-    
-    std::unordered_map<uint8_t, std::vector<std::string>> permutationsCachePart1;
-    permutationsCachePart1.reserve(12);
 
-    std::unordered_map<uint8_t, std::vector<std::string>> permutationsCachePart2;
-    permutationsCachePart2.reserve(12);
+    std::array<std::vector<uint16_t>, NUM_EQUATIONS> equations;
+    std::array<uint64_t, NUM_EQUATIONS> results;
 
-    uint64_t part1Sum = 0;
-    uint64_t part2Sum = 0;
-
+    uint16_t lineIndex = 0;
     std::string buffer;
+    buffer.reserve(100);
     while (std::getline(file, buffer)) {
         size_t delimiter = buffer.find(':');
 
-        uint64_t result = std::stoull(buffer.substr(0, delimiter));
+        results[lineIndex] = std::stoull(buffer.substr(0, delimiter));
 
         std::istringstream iss(buffer.substr(delimiter + 1));
         std::vector<uint16_t> numbers;
-        numbers.reserve(12);
+        numbers.reserve(20);
 
         uint16_t number;
         while (iss >> number) {
             numbers.push_back(number);
         }
 
-        if (isValidEquation(result, numbers, permutationsCachePart1, false)) {
-            part1Sum += result;
+        equations[lineIndex++] = std::move(numbers);
+    }
+
+    file.close();
+    
+    std::array<std::vector<std::string>, MAX_PERMUTATION_R> permutationsCachePart1{};
+
+    std::array<std::vector<std::string>, MAX_PERMUTATION_R> permutationsCachePart2{};
+
+    uint64_t part1Sum = 0;
+    uint64_t part2Sum = 0;
+
+    for (uint16_t i = 0; i < NUM_EQUATIONS; i++) {
+        if (isValidEquation(results[i], equations[i], permutationsCachePart1, false)) {
+            part1Sum += results[i];
         }
 
-        if (isValidEquation(result, numbers, permutationsCachePart2, true)) {
-            part2Sum += result;
+        if (isValidEquation(results[i], equations[i], permutationsCachePart2, true)) {
+            part2Sum += results[i];
         }
-        
     }
+        
 
     std::cout << "Part 1: "<< part1Sum << '\n';
     std::cout << "Part 2: "<< part2Sum << '\n';
