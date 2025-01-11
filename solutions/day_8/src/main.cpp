@@ -11,10 +11,12 @@
 constexpr int32_t GRID_SIDE_SZ = 50;
 
 struct Location {
-    int32_t x;
-    int32_t y;
+    int8_t x;
+    int8_t y;
 
-    Location(int32_t x, int32_t y) : x{x}, y{y} {}
+    Location() : x{0}, y{0} {}
+
+    Location(int8_t x, int8_t y) : x{x}, y{y} {}
 };
 
 static inline bool isAnthena(char c) {
@@ -25,7 +27,7 @@ static inline bool isInBounds(Location location) {
     return location.x < GRID_SIDE_SZ && location.x > -1 && location.y < GRID_SIDE_SZ && location.y > -1;
 }
 
-static void markAntinodesPart1(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint32_t &antinodesCount, Location a, Location b) {
+static void markAntinodesPart1(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint16_t &antinodesCount, Location a, Location b) {
     uint32_t dx = b.x - a.x;
     uint32_t dy = b.y - a.y;
 
@@ -42,13 +44,15 @@ static void markAntinodesPart1(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_S
     }
 }
 
-static void markAntinodesPart2(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint32_t &antinodesCount, Location a, Location b) {
+static void markAntinodesPart2(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint16_t &antinodesCount, Location a, Location b) {
     uint32_t dx = b.x - a.x;
     uint32_t dy = b.y - a.y;
     uint16_t i = 0;
 
+    Location a1{};
     while (true) {
-        Location a1(b.x + dx * i, b.y + dy * i);
+        a1.x = b.x + dx * i;
+        a1.y = b.y + dy * i;
         if (isInBounds(a1)) {
             if (!markedAntinodes[b.x + dx * i].test(b.y + dy * i)) {
                 markedAntinodes[b.x + dx * i].set(b.y + dy * i);
@@ -61,9 +65,11 @@ static void markAntinodesPart2(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_S
     }
 
     i = 0;
+    Location a2{};
     while (true) {
-        Location a1(a.x - dx * i, a.y - dy * i);
-        if (isInBounds(a1)) {
+        a2.x = a.x - dx * i;
+        a2.y = a.y - dy * i;
+        if (isInBounds(a2)) {
             if (!markedAntinodes[a.x - dx * i].test(a.y - dy * i)) {
                 markedAntinodes[a.x - dx * i].set(a.y - dy * i);
                 antinodesCount++;
@@ -85,9 +91,10 @@ int main() {
     std::unordered_map<char, std::vector<Location>> charter;
 
     std::string lineBuffer;
-    uint32_t lineIndex = 0;
+    lineBuffer.reserve(GRID_SIDE_SZ);
+    uint8_t lineIndex = 0;
     while(std::getline(file, lineBuffer)) {
-        for (uint32_t i = 0; i < lineBuffer.size(); i++) {
+        for (uint8_t i = 0; i < lineBuffer.size(); i++) {
             if (isAnthena(lineBuffer[i])) {
                 Location location(lineIndex, i);
                 charter[lineBuffer[i]].push_back(location);
@@ -99,11 +106,11 @@ int main() {
     std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodes{};
     std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodesPart2{};
 
-    uint32_t part1 = 0;
-    uint32_t part2 = 0;
+    uint16_t part1 = 0;
+    uint16_t part2 = 0;
     for (auto kvp : charter) {
-        for (uint32_t i = 0; i < kvp.second.size()-1; i++) {
-            for (uint32_t j = i + 1; j < kvp.second.size(); j++) {
+        for (uint16_t i = 0; i < kvp.second.size()-1; i++) {
+            for (uint16_t j = i + 1; j < kvp.second.size(); j++) {
                 markAntinodesPart1(markedAntinodes, part1, kvp.second[i], kvp.second[j]);
                 markAntinodesPart2(markedAntinodesPart2, part2, kvp.second[i], kvp.second[j]);
             }
