@@ -47,7 +47,7 @@ static void markAntinodesPart1(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_S
 static void markAntinodesPart2(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint16_t &antinodesCount, Location a, Location b) {
     uint32_t dx = b.x - a.x;
     uint32_t dy = b.y - a.y;
-    uint16_t i = 0;
+    uint8_t i = 0;
 
     Location a1{};
     while (true) {
@@ -103,7 +103,7 @@ int main() {
         lineIndex++;
     }
 
-    std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodes{};
+    std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodesPart1{};
     std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodesPart2{};
 
     uint16_t part1 = 0;
@@ -111,7 +111,7 @@ int main() {
     for (auto kvp : charter) {
         for (uint16_t i = 0; i < kvp.second.size()-1; i++) {
             for (uint16_t j = i + 1; j < kvp.second.size(); j++) {
-                markAntinodesPart1(markedAntinodes, part1, kvp.second[i], kvp.second[j]);
+                markAntinodesPart1(markedAntinodesPart1, part1, kvp.second[i], kvp.second[j]);
                 markAntinodesPart2(markedAntinodesPart2, part2, kvp.second[i], kvp.second[j]);
             }
         }
