@@ -25,7 +25,7 @@ static inline bool isInBounds(Location location) {
     return location.x < GRID_SIDE_SZ && location.x > -1 && location.y < GRID_SIDE_SZ && location.y > -1;
 }
 
-static void markAntinodes(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint32_t &antinodesCount, Location a, Location b) {
+static void markAntinodesPart1(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint32_t &antinodesCount, Location a, Location b) {
     uint32_t dx = b.x - a.x;
     uint32_t dy = b.y - a.y;
 
@@ -39,6 +39,39 @@ static void markAntinodes(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &m
     if (isInBounds(a2) && !markedAntinodes[a.x - dx].test(a.y - dy)) {
         markedAntinodes[a.x - dx].set(a.y - dy);
         antinodesCount++;
+    }
+}
+
+static void markAntinodesPart2(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint32_t &antinodesCount, Location a, Location b) {
+    uint32_t dx = b.x - a.x;
+    uint32_t dy = b.y - a.y;
+    uint16_t i = 0;
+
+    while (true) {
+        Location a1(b.x + dx * i, b.y + dy * i);
+        if (isInBounds(a1)) {
+            if (!markedAntinodes[b.x + dx * i].test(b.y + dy * i)) {
+                markedAntinodes[b.x + dx * i].set(b.y + dy * i);
+                antinodesCount++;
+            }
+        } else {
+            break;
+        }
+        i++;
+    }
+
+    i = 0;
+    while (true) {
+        Location a1(a.x - dx * i, a.y - dy * i);
+        if (isInBounds(a1)) {
+            if (!markedAntinodes[a.x - dx * i].test(a.y - dy * i)) {
+                markedAntinodes[a.x - dx * i].set(a.y - dy * i);
+                antinodesCount++;
+            }
+        } else {
+            break;
+        }
+        i++;
     }
 }
 
@@ -64,17 +97,21 @@ int main() {
     }
 
     std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodes{};
+    std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> markedAntinodesPart2{};
 
     uint32_t part1 = 0;
+    uint32_t part2 = 0;
     for (auto kvp : charter) {
         for (uint32_t i = 0; i < kvp.second.size()-1; i++) {
             for (uint32_t j = i + 1; j < kvp.second.size(); j++) {
-                markAntinodes(markedAntinodes, part1, kvp.second[i], kvp.second[j]);
+                markAntinodesPart1(markedAntinodes, part1, kvp.second[i], kvp.second[j]);
+                markAntinodesPart2(markedAntinodesPart2, part2, kvp.second[i], kvp.second[j]);
             }
         }
     }
 
     std::cout << "Part 1: " << part1 << '\n';
+    std::cout << "Part 2: " << part2 << '\n';
 
     return EXIT_SUCCESS;
 }
