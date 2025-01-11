@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-constexpr int32_t GRID_SIDE_SZ = 12;
+constexpr int32_t GRID_SIDE_SZ = 50;
 
 struct Location {
     int32_t x;
@@ -26,27 +26,24 @@ static inline bool isInBounds(Location location) {
 }
 
 static void markAntinodes(std::array<std::bitset<GRID_SIDE_SZ>, GRID_SIDE_SZ> &markedAntinodes, uint32_t &antinodesCount, Location a, Location b) {
-    uint32_t dx = std::abs(a.x - b.x); 
-    uint32_t dy = std::abs(a.y - b.y);
+    uint32_t dx = b.x - a.x;
+    uint32_t dy = b.y - a.y;
 
     Location a1(b.x + dx, b.y + dy);
     if (isInBounds(a1) && !markedAntinodes[b.x + dx].test(b.y + dy)) {
         markedAntinodes[b.x + dx].set(b.y + dy);
         antinodesCount++;
-        std::cout << "Marked antinode at (" << b.x+dx << "," << b.y+dy << ")" << '\n';
     }
 
     Location a2(a.x - dx, a.y - dy);
     if (isInBounds(a2) && !markedAntinodes[a.x - dx].test(a.y - dy)) {
         markedAntinodes[a.x - dx].set(a.y - dy);
         antinodesCount++;
-
-        std::cout << "Marked antinode at (" << a.x-dx << "," << a.y-dy << ")" << '\n';
     }
 }
 
 int main() {
-    
+
     std::ifstream file ("input_files/day_8.txt");
     if (!file.is_open()) {
         throw std::runtime_error("Could not open input file");
@@ -59,7 +56,7 @@ int main() {
     while(std::getline(file, lineBuffer)) {
         for (uint32_t i = 0; i < lineBuffer.size(); i++) {
             if (isAnthena(lineBuffer[i])) {
-                Location location(i, lineIndex);
+                Location location(lineIndex, i);
                 charter[lineBuffer[i]].push_back(location);
             }
         }
@@ -72,7 +69,7 @@ int main() {
     for (auto kvp : charter) {
         for (uint32_t i = 0; i < kvp.second.size()-1; i++) {
             for (uint32_t j = i + 1; j < kvp.second.size(); j++) {
-                markAntinodes(markedAntinodes, part1, kvp.second[i], kvp.second[j]);  
+                markAntinodes(markedAntinodes, part1, kvp.second[i], kvp.second[j]);
             }
         }
     }
