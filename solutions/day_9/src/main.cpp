@@ -21,23 +21,16 @@ int main() {
     while (file.get(ch)) {
 
         size_t value = ch - '0';
-        std::vector<std::string> toInsert;
-        toInsert.reserve(value * std::to_string(index).size());
 
         if (isSpace) {
-            toInsert.insert(toInsert.end(), value, ".");
+            blocks.insert(blocks.end(), value, ".");
         } else {
-            toInsert.insert(toInsert.end(), value, std::to_string(index));
+            blocks.insert(blocks.end(), value, std::to_string(index));
             index++;
         }
 
-        toInsert.shrink_to_fit();
-        blocks.insert(blocks.end(), std::make_move_iterator(toInsert.begin()), std::make_move_iterator(toInsert.end()));
         isSpace = !isSpace;
     }
-
-    blocks.shrink_to_fit();
-
 
     size_t left = 0;
     size_t right = blocks.size() - 1;
@@ -68,5 +61,5 @@ int main() {
         checksum += i * std::stoull(blocks[i]);
     }
 
-    std::cout << "Part 1: " << checksum << std::endl;
+    std::cout << "Part 1: " << checksum << '\n';
 }
