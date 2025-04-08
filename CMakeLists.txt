@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Needed for proper nvim lsp functioning.
 
-set(DAY "day_8" CACHE STRING "Day to compile")
+set(DAY "day_9" CACHE STRING "Day to compile")
 
 # Include custom CMake functions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -22,4 +22,3 @@ if (ENABLE_TESTS)
 endif()
 
 add_subdirectory(solutions)
-
